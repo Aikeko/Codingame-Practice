@@ -1,0 +1,103 @@
+# https://www.codingame.com/ide/puzzle/1d-spreadsheet
+
+# You are given a 1-dimensional spreadsheet. You are to resolve the formulae and give the value of all its cells.
+
+# Each input cell's content is provided as an operation with two operands arg1 and arg2.
+
+# There are 4 types of operations:
+# VALUE arg1 arg2: The cell's value is arg1, (arg2 is not used and will be "_" to aid parsing).
+# ADD arg1 arg2: The cell's value is arg1 + arg2.
+# SUB arg1 arg2: The cell's value is arg1 - arg2.
+# MULT arg1 arg2: The cell's value is arg1 × arg2.
+
+# Arguments can be of two types:
+# • Reference $ref: If an argument starts with a dollar sign, it is a interpreted as a reference and its value is equal to the value of the cell by that number ref, 0-indexed.
+# For example, "$0" will have the value of the result of the first cell.
+# Note that a cell can reference a cell after itself!
+
+# • Value val: If an argument is a pure number, its value is val.
+# For example: "3" will have the value 3.
+
+# There won't be any cyclic references: a cell that reference itself or a cell that references it, directly or indirectly.
+
+import sys
+import math
+
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+
+
+n = 3
+testcase = ['VALUE 20 _', 'ADD $0 100', 'ADD $1 1']
+cellsInput = [[] for i in range(n)]
+spreadsheet = ['?' for i in range(n)]
+
+for i in range(n):
+    operation, arg_1, arg_2 = testcase.split()
+    cell = [operation, arg_1, arg_2]
+    cellsInput[i] = cell
+    if operation == 'VALUE' and arg_1[0] != '$':
+        spreadsheet[i] = int(arg_1)
+
+def checkValue(arg, spreadsheet, i):
+    #print("checkValue start with arg %s on it %s" % (arg, i))
+    if arg[0] == '$':
+        ref = int(arg[1:])
+        if ref < i:
+            try:
+                arg1 = int(spreadsheet[ref])
+                return arg1
+                #print("checkValue end")
+            except:
+                return int(findValue(cellsInput[ref], spreadsheet, ref))
+                #print("checkValue end")
+        else:
+            return int(findValue(cellsInput[ref], spreadsheet, ref))
+    else:
+        try:
+            return int(arg)
+        except:
+            return arg
+        #print("checkValue end")
+
+def findValue(cell, spreadsheet, iteration):
+    #print("findValue start with cell %s on it %s" % (cell, iteration))
+    try:
+        spreadsheet[iteration] - 2
+        return spreadsheet[iteration]
+    except:
+        pass
+    
+    operation = cell[0]
+    arg1 = cell[1]
+    arg2 = cell[2]
+    i = iteration
+    
+    if operation == 'SUB' and arg1 == arg2:
+        return 0
+    
+    if arg1 == arg2:
+        arg1 = checkValue(arg1, spreadsheet, i)
+        arg2 = arg1
+    else:
+        arg1 = checkValue(arg1, spreadsheet, i)
+        arg2 = checkValue(arg2, spreadsheet, i)
+
+
+    if operation == 'VALUE':
+        return arg1
+    elif operation == 'ADD':
+        return arg1 + arg2
+    elif operation == 'SUB':
+        return arg1 - arg2
+    elif operation == 'MULT':
+        return arg1 * arg2
+    else:
+        return 'ERROR'
+        
+for i in range(n):
+    spreadsheet[i] = findValue(cellsInput[i], spreadsheet, i)
+    
+for i in range(n):
+    print(spreadsheet[i])
