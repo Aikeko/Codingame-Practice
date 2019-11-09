@@ -1,0 +1,83 @@
+# https://www.codingame.com/ide/puzzle/lumen
+
+# THEY put you in a square shape room, with N meters on each side.
+# THEY want to know everything about you.
+# THEY are observing you.
+# THEY placed some candles in the room.
+
+# Every candle makes L "light" in the spot they are, and every spot in square shape gets one less "light" as the next ones. If a spot is touched by two candles, it will have the larger "light" it can have. Every spot has the base light of 0.
+
+# You can hide only, if you find a dark spot which has 0 "light".
+# How many dark spots you have?
+
+# You will receive a map of the room, with the empty places (X) and Candles (C) in N rows, each character separated by a space.
+
+# Example for the light spread N = 5, L = 3:
+# X X X X X
+# X C X X X
+# X X X X X
+# X X X X X
+# X X X X X
+
+# 2 2 2 1 0
+# 2 3 2 1 0
+# 2 2 2 1 0
+# 1 1 1 1 0
+# 0 0 0 0 0
+
+
+import sys
+import math
+
+n = 5
+l = 3
+rows = ['X X X X X', 'X C X X X', 'X X X X X', 'X X X X X', 'X X X X X']
+
+def spreadLight(lightLevel, roomMap, x, y):
+    #print('spreadLight start with lightLevel %s, x %s, and y %s' % (lightLevel, x, y))
+    light = int(lightLevel-1)
+    c = y - 1 if y - 1 > 0 else 0
+    for i in range(3):
+        r = x - 1 if x - 1 > 0 else 0
+        for j in range(3):
+            try:
+                if int(roomMap[c][r]) < light:
+                    roomMap[c][r] = str(light)
+            except:
+                pass
+             
+            if r < len(roomMap[0]):
+                r += 1
+            if x == 0 and r == 2:
+                break
+        
+        if c < len(roomMap):
+            c += 1
+        if y == 0 and c == 2:
+            break
+    
+    return roomMap
+    
+def findLight(lightLevel, roomMap):
+    level = lightLevel + 1
+    while level > 0:
+        for i, row in enumerate(roomMap):
+            for j, n, in enumerate(row):
+                if int(n) == level and level > 1: #spread light
+                    roomMap = spreadLight(level, roomMap, j, i)
+    
+        level -= 1
+        
+    return roomMap
+
+def findDark(lightLevel, roomMap):
+    room = findLight(lightLevel, roomMap)
+    total = 0
+    
+    for row in room:
+        total += row.count('0')
+    
+    return total
+
+    
+print(findDark(l, rows))
